@@ -4,10 +4,13 @@ import './index.css'
 import App from './App.jsx'
 import "tailwindcss";
 import './index.css'
+import { CartProvider } from './context/CartContext.jsx';
 
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <App />
+    <CartProvider>
+      <App />
+    </CartProvider>
   </StrictMode>,
 )
