@@ -30,22 +30,27 @@ function ProductList() {
         return <div>Error:{error}</div>
     }
     return (
-        <div className="min-h-screen bg-gray-100">
-            <h1 className="text-3xl font-bold text-center py-6 bg-white shadow-md">ProductList</h1>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-6">
+        <div className="min-h-screen bg-slate-900">
+            <h1 className="text-3xl font-bold text-center py-6 
+                       text-gray-100 
+                       bg-slate-800 
+                       shadow-md">
+                ProductList
+            </h1>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 
+                        gap-6 p-6">
                 {products.length > 0 ? (
                     products.map((product) => (
                         <ProductCard key={product.id} product={product} />
                     ))
                 ) : (
-                    <p className="text-center col-span-full">no card available</p>
-                )
-                }
-
+                    <p className="text-center col-span-full text-gray-400">
+                        no card available
+                    </p>
+                )}
             </div>
         </div>
-    )
-
-
+    );
 }
 export default ProductList;

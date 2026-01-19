@@ -1,18 +1,20 @@
 import { useCart } from "../context/CartContext";
+import { Link } from "react-router-dom";
 
 function CartPage() {
-    const { cartItems, total, removeFromCart, updateQuantity } = useCart();
+    const { cartItems, total, removeFromCart, updateQuantity,clearCart } = useCart();
     const BASEURL = import.meta.env.VITE_DJANGO_BASE_URL;
 
     return (
-        <div className="min-h-screen bg-gray-100 p-10 mx-3.5 my-8">
-            <h1 className="text-3xl font-bold mb-6">Your Shopping Cart</h1>
+        <div className="min-h-screen bg-slate-900 p-10  mt-12">
+            <h1 className="text-2xl font-extrabold tracking-wider bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 text-transparent bg-clip-text hover:from-pink-400 hover:to-indigo-400 transition-all duration-300">
+                Your Cart</h1>
 
             {cartItems.length === 0 ? (
                 <p className="text-lg text-gray-600">Your cart is empty.</p>
             ) : (
                 <>
-                    <div className="space-y-6">
+                    <div className="space-y-10">
                         {cartItems.map((item) => (
                             <div
                                 key={item.id}
@@ -28,7 +30,6 @@ function CartPage() {
                                         />
                                     )
                                     }
-
                                 </div>
 
                                 <div className="flex-1">
@@ -76,9 +77,12 @@ function CartPage() {
                     </div>
 
                     <div className="mt-8 text-right">
-                        <h2 className="text-2xl font-bold">
+                        <h2 className="text-2xl text-white font-bold">
                             Total: ₹{total.toFixed(2)}
                         </h2>
+                        <Link to="/checkout" className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 mt-4 inline-block">
+                            Proceed to Checkout
+                        </Link>
                     </div>
                 </>
             )}
