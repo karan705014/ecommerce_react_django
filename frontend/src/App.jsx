@@ -7,12 +7,14 @@ import CheackoutPage from "./pages/CheackoutPage.jsx";
 import PrivateRouter from "./components/PrivateRouter.jsx";
 import Login from "./pages/Login.jsx";
 import Signup from "./pages/Signup.jsx";
+import Home from "./pages/Home.jsx";
 function App() {
   return (
     <Router>
       <NavBar />
       <Routes>
-        <Route path="/" element={<ProductList />} />
+        <Route path="/" element={<Home />} />
+        <Route path="/category/:slug" element={<Home />} />
         <Route path="/products/:id" element={<ProductDetails />} />
         <Route path="/cart" element={<CartPage />} />
         <Route element={<PrivateRouter />}>

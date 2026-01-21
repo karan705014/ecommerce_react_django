@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, Link,useNavigate } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 
 function ProductDetails() {
@@ -56,7 +56,7 @@ function ProductDetails() {
 
     return (
         <div className="min-h-screen bg-slate-900 px-6 pt-24 pb-10">
-            <div className="max-w-4xl mx-auto bg-slate-800 rounded-xl shadow-xl p-6 
+            <div className="max-w-4xl mx-auto bg-slate-800 rounded-xl shadow-xl p-6
                             flex flex-col md:flex-row gap-8 border border-white/10">
 
                 <img
@@ -88,7 +88,7 @@ function ProductDetails() {
                             hover:shadow-lg active:scale-95 transition-all
                         "
                     >
-                        🛒 Add to Cart
+                         Add to Cart
                     </button>
 
                     <div className="mt-4">

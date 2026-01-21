@@ -1,17 +1,53 @@
 from rest_framework.response import Response
+from django.db.models import Q
 from rest_framework import status
 from .models import Product,Category,Cart,CartItem,Order,OrderItem
 from rest_framework.decorators import api_view,permission_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.contrib.auth.models import User
-from . serializers import CategorySerializer,ProductSerializer,CartItemSerializer,CartSerializer,RegisterSerializer,UserSerializer  
+from . serializers import CategorySerializer,ProductSerializer,CartItemSerializer,CartSerializer,RegisterSerializer,UserSerializer
 
+
+from django.core.paginator import Paginator
 
 @api_view(['GET'])
 def get_products(request):
-    products= Product.objects.all()
-    serializer = ProductSerializer(products,many=True)
-    return Response(serializer.data ,status=status.HTTP_200_OK)
+    products = Product.objects.all()
+
+    slug = request.query_params.get("category")
+    search = request.query_params.get("search")
+    ordering = request.query_params.get("ordering")
+    page_number = request.query_params.get("page", 1)
+
+    # CATEGORY FILTER
+    if slug:
+        products = products.filter(category__slug=slug)
+
+    # SEARCH (multiple words)
+    if search:
+        words = search.strip().split()
+        query = Q()
+        for word in words:
+            query |= Q(name__icontains=word)
+        products = products.filter(query).distinct()
+
+    # SORTING
+    allowed_ordering = ['price', '-price', 'created_at', '-created_at']
+    if ordering in allowed_ordering:
+        products = products.order_by(ordering)
+
+    # PAGINATION
+    paginator = Paginator(products, 4)  # 4 products per page
+    page_obj = paginator.get_page(page_number)
+
+    serializer = ProductSerializer(page_obj, many=True)
+
+    return Response({
+        "count": paginator.count,
+        "total_pages": paginator.num_pages,
+        "current_page": page_obj.number,
+        "results": serializer.data
+    }, status=status.HTTP_200_OK)
 
 
 @api_view(['GET'])
@@ -25,11 +61,11 @@ def get_categories(request):
 def get_product_details(request,pk):
     try:
         product = Product.objects.get(id=pk)
-        serializer = ProductSerializer(product ,context={'request': request})     
+        serializer = ProductSerializer(product ,context={'request': request})
         return Response(serializer.data)
     except Product.DoesNotExist:
         return Response({'error': 'Product not found'}, status=status.HTTP_404_NOT_FOUND)
-  
+
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -82,7 +118,7 @@ def update_cart_quantity(request):
             {"error": "Cart item not found"},
             status=status.HTTP_404_NOT_FOUND
         )
-            
+
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -106,11 +142,11 @@ def create_order(request):
         #validate phone number
         if not phone.isdigit() or len(phone) < 10:
             return Response({'error':'Invalid phone number'},status=status.HTTP_400_BAD_REQUEST)
-        #get user cart 
+        #get user cart
         cart ,created = Cart.objects.get_or_create(user=request.user)
         if not cart.items.exists():
-            return Response({'error':'Cart is empty'},status=status.HTTP_400_BAD_REQUEST)   
-        
+            return Response({'error':'Cart is empty'},status=status.HTTP_400_BAD_REQUEST)
+
         total = sum([item.product.price * item.quantity for item in cart.items.all()])
         order = Order.objects.create(
             user = request.user,
@@ -134,7 +170,7 @@ def create_order(request):
     except Exception as e:
         return Response({'error':str(e)},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    
+
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def register(request):

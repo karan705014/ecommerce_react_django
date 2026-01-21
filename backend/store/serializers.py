@@ -24,7 +24,7 @@ class CartItemSerializer(serializers.ModelSerializer):
 
 class CartSerializer(serializers.ModelSerializer):
     #HERE CART ITEM SERIALIZEER  INCLUDE ALL THINS IN THE CARTITEM MODEL
-    items = CartItemSerializer(many=True,read_only=True) 
+    items = CartItemSerializer(many=True,read_only=True)
     total = serializers.ReadOnlyField()
 
     class Meta:
@@ -48,12 +48,10 @@ class RegisterSerializer(serializers.ModelSerializer):
         if data['password'] != data['password2']:
             raise serializers.ValidationError("Passwords do not match")
         return data
-    
+
     def create(self, validated_data):
         username = validated_data['username']
         email = validated_data['email']
         password = validated_data['password']
         user = User.objects.create_user(username=username,email=email,password=password)
         return user
-
-
