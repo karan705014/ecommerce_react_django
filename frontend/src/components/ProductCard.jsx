@@ -1,25 +1,43 @@
 import { Link } from "react-router-dom";
 
 function ProductCard({ product }) {
-    const BASEURL = import.meta.env.VITE_DJANGO_BASE_URL;
-    return (
-        <Link
-            to={`/products/${product.id}`}
-            className="bg-white rounded-xl shadow-md hover:shadow-lg hover:scale-[1.02] transition-transform p-4 cursor-pointer block"
-        >
-            <img
-                className="w-full h-56 object-cover rounded-lg mb-4"
-                src={`${BASEURL}${product.image}`}
-                alt={product.name}
-            />
-            <h2 className="text-lg font-semibold text-gray-800">
-                {product.name}
-            </h2>
-            <p className="text-gray-600 font-medium">
-                ₹{product.price}
-            </p>
-        </Link>
+  const BASEURL = import.meta.env.VITE_DJANGO_BASE_URL;
 
-    )
+  return (
+    <Link
+      to={`/products/${product.id}`}
+      className="
+        bg-slate-900/80 backdrop-blur-xl
+        border border-white/30
+        rounded-xl overflow-hidden
+        shadow-lg
+        hover:scale-[1.03]
+        hover:shadow-xl
+        transition-all duration-300
+        block
+      "
+    >
+      {/* Image */}
+      <div className="relative">
+        <img
+          src={`${BASEURL}${product.image}`}
+          alt={product.name}
+          className="w-full h-56 object-cover"
+        />
+      </div>
+
+      {/* Text */}
+      <div className="p-4">
+        <h2 className="text-white font-semibold text-lg truncate">
+          {product.name}
+        </h2>
+
+        <p className="text-white font-bold text-base mt-1">
+          ₹{product.price}
+        </p>
+      </div>
+    </Link>
+  );
 }
+
 export default ProductCard;

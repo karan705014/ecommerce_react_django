@@ -9,11 +9,12 @@ export function CartProvider({ children }) {
     const [cartItems, setCartItems] = useState([]);
     const [total, setTotal] = useState(0);
 
-  
+
     const clearCart = () => {
         setCartItems([]);
         setTotal(0);
     };
+
 
     const fetchCart = async () => {
         try {
@@ -32,6 +33,7 @@ export function CartProvider({ children }) {
         }
     };
 
+
     useEffect(() => {
         const token = getAccessToken();
         if (token) {
@@ -41,6 +43,7 @@ export function CartProvider({ children }) {
         }
     }, []);
 
+    
 
     const addToCart = async (productId) => {
         try {

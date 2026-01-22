@@ -1,29 +1,23 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { saveToken } from "../utils/auth";
-import { useLocation } from "react-router-dom";
-import { useEffect } from "react";
 import { useCart } from "../context/CartContext";
-
-
 
 function Login() {
     const BASEURL = import.meta.env.VITE_DJANGO_BASE_URL;
+
     const [form, setForm] = useState({ username: "", password: "" });
     const [message, setMessage] = useState("");
+
     const navigate = useNavigate();
     const location = useLocation();
     const { fetchCart } = useCart();
-
-
 
     useEffect(() => {
         if (location.state?.message) {
             setMessage(location.state.message);
         }
     }, [location.state]);
-
-
 
     const handleChange = (e) => {
         setForm({ ...form, [e.target.name]: e.target.value });
@@ -32,6 +26,7 @@ function Login() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setMessage("");
+
         try {
             const res = await fetch(`${BASEURL}/api/token/`, {
                 method: "POST",
@@ -44,34 +39,39 @@ function Login() {
                 saveToken(data);
                 await fetchCart();
                 setMessage("Login successful! Redirecting...");
-                setTimeout(() => navigate("/"), 800);
+                setTimeout(() => navigate("/"), 900);
             } else {
                 setMessage("Invalid credentials. Please try again.");
             }
         } catch (error) {
-            console.error("Signup error:", error);
             setMessage(error.message);
         }
-
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-slate-900 p-6 mt-8">
-            <div className="
-                max-w-md w-full
-                bg-white/10 backdrop-blur-xl
-                border border-white/20
-                rounded-2xl p-8
-                shadow-[0_0_30px_rgba(99,102,241,0.3)]
-            ">
-                <h2 className="
-                    text-3xl font-extrabold text-center mb-6
-                    bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400
-                    text-transparent bg-clip-text
-                ">
+        <div className="min-h-screen flex items-center justify-center bg-slate-900 p-6">
+            <div
+                className="
+                    max-w-md w-full
+                    bg-slate-900/80 backdrop-blur-xl
+                    border border-cyan-400/30
+                    rounded-2xl p-8
+                    shadow-[0_0_40px_rgba(34,211,238,0.25)]
+                "
+            >
+                {/* Heading */}
+                <h2
+                    className="
+                        text-3xl font-extrabold text-center mb-6
+                        bg-gradient-to-r from-cyan-400 to-blue-500
+                        text-transparent bg-clip-text
+                        tracking-wide
+                    "
+                >
                     Login
                 </h2>
 
+                {/* Form */}
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <input
                         name="username"
@@ -81,8 +81,10 @@ function Login() {
                         className="
                             w-full p-3 rounded-lg
                             bg-slate-800 text-white
-                            border border-slate-600
-                            focus:outline-none focus:ring-2 focus:ring-indigo-400
+                            border border-cyan-400/20
+                            focus:outline-none
+                            focus:ring-2 focus:ring-cyan-400/60
+                            transition
                         "
                     />
 
@@ -95,20 +97,25 @@ function Login() {
                         className="
                             w-full p-3 rounded-lg
                             bg-slate-800 text-white
-                            border border-slate-600
-                            focus:outline-none focus:ring-2 focus:ring-pink-400
+                            border border-cyan-400/20
+                            focus:outline-none
+                            focus:ring-2 focus:ring-blue-400/60
+                            transition
                         "
                     />
 
-
                     <button
                         className="
-                            w-full py-3 rounded-xl font-bold text-white
-                            bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500
-                            shadow-[0_0_25px_rgba(168,85,247,0.6)]
-                            hover:shadow-[0_0_40px_rgba(236,72,153,0.9)]
-                            active:scale-95
-                            active:shadow-[0_0_60px_rgba(236,72,153,1)]
+                            w-full py-3 rounded-xl
+                            font-bold text-white
+                            bg-gradient-to-r from-cyan-500 to-blue-500
+
+                            shadow-[0_0_20px_rgba(34,211,238,0.4)]
+                            hover:shadow-[0_0_32px_rgba(34,211,238,0.6)]
+
+                            active:scale-[0.97]
+                            active:shadow-[0_0_40px_rgba(34,211,238,0.8)]
+
                             transition-all duration-300
                         "
                     >
@@ -116,22 +123,29 @@ function Login() {
                     </button>
                 </form>
 
+                {/* Message */}
                 {message && (
-                    <p className="
-                       mt-6 text-center
-                     text-green-400 font-semibold
-                     bg-pink-500/10
-                       border border-pink-500/30
-                       px-4 py-2 rounded-lg
-                        shadow-[0_0_15px_rgba(236,72,153,0.6)]
-                        ">
+                    <p
+                        className="
+                            mt-6 text-center
+                            text-cyan-300 font-semibold
+                            bg-cyan-500/10
+                            border border-cyan-400/30
+                            px-4 py-2 rounded-lg
+                            shadow-[0_0_15px_rgba(34,211,238,0.4)]
+                        "
+                    >
                         {message}
                     </p>
                 )}
 
+                {/* Signup link */}
                 <p className="mt-6 text-center text-gray-300">
                     Don’t have an account?{" "}
-                    <a href="/signup" className="text-indigo-400 hover:underline">
+                    <a
+                        href="/signup"
+                        className="text-cyan-400 hover:text-cyan-300 transition"
+                    >
                         Sign Up
                     </a>
                 </p>
@@ -139,4 +153,5 @@ function Login() {
         </div>
     );
 }
+
 export default Login;

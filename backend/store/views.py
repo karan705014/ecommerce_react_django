@@ -19,16 +19,16 @@ def get_products(request):
     ordering = request.query_params.get("ordering")
     page_number = request.query_params.get("page", 1)
 
-    # CATEGORY FILTER
+    # FILTER
     if slug:
-        products = products.filter(category__slug=slug)
+        products = products.filter(category__slug=slug) #when you write category__slug its mean product.category.slug
 
     # SEARCH (multiple words)
     if search:
         words = search.strip().split()
         query = Q()
         for word in words:
-            query |= Q(name__icontains=word)
+            query = query | Q(name__icontains=word)
         products = products.filter(query).distinct()
 
     # SORTING

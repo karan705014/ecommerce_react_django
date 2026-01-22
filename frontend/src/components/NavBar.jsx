@@ -53,32 +53,73 @@ function NavBar() {
                 <Link
                     to="/"
                     className="
-                        text-2xl font-extrabold tracking-wider
-                        bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400
-                        text-transparent bg-clip-text
-                    "
-                >
-                    kartZone
-                </Link>
+    inline-flex items-center justify-center
+    px-4 py-2
+    rounded-xl
 
+    bg-slate-900
+    border border-cyan-400/40
+
+    bg-gradient-to-r from-cyan-400 to-blue-500
+    text-transparent bg-clip-text
+    text-2xl font-extrabold
+    tracking-[0.15em]
+
+    shadow-[0_0_14px_rgba(34,211,238,0.25)]
+    hover:shadow-[0_0_22px_rgba(34,211,238,0.35)]
+
+    transition-all duration-300 ease-out
+  "
+                >
+                    KRN ZONE
+                </Link>
 
                 {/* Center Links */}
                 <div className="flex items-center gap-6 text-white">
+                    <Link
+                        to="/"
+                        className="
+    px-4 py-1.5 rounded-lg
+    text-sm font-medium
+    text-cyan-300
 
-                    <Link to="/" className="hover:underline">
+    border border-cyan-400/40
+    bg-slate-900
+
+    transition-all duration-200 ease-out
+
+    hover:bg-cyan-500/10
+    hover:text-cyan-200
+
+    active:scale-[0.96]
+    active:shadow-[0_0_12px_rgba(34,211,238,0.35)]
+  "
+                    >
                         Home
                     </Link>
 
                     {/* Categories Dropdown */}
-                    {/* Categories Dropdown */}
                     <div className="relative group">
 
                         {/* Trigger */}
-                        <span className="cursor-pointer hover:underline text-white">
+                        <span
+                            className="
+            cursor-pointer
+            px-4 py-1.5 rounded-lg
+            text-sm font-medium text-cyan-300
+
+            border border-cyan-400/40
+            bg-slate-900
+
+            transition-all duration-200 ease-out
+            hover:bg-cyan-500/10
+            hover:text-cyan-200
+        "
+                        >
                             Categories ▾
                         </span>
 
-                        {/* 👇 INVISIBLE HOVER BRIDGE (MOST IMPORTANT LINE) */}
+                        {/* INVISIBLE HOVER BRIDGE (SAME) */}
                         <div className="absolute left-0 top-full h-4 w-full"></div>
 
                         {/* Dropdown */}
@@ -86,15 +127,26 @@ function NavBar() {
                             className="
             absolute left-0 top-full mt-4
             hidden group-hover:block
-            bg-slate-800 rounded-xl shadow-xl
-            border border-white/10
+
+            bg-slate-900
+            rounded-xl
+            border border-cyan-400/30
+
             min-w-[180px]
             z-50
+
+            shadow-[0_0_16px_rgba(34,211,238,0.25)]
         "
                         >
                             <Link
                                 to="/"
-                                className="block px-4 py-2 hover:bg-slate-700"
+                                className="
+                block px-4 py-2
+                text-cyan-300
+                transition-colors
+                hover:bg-cyan-500/10
+                hover:text-cyan-200
+            "
                             >
                                 All Products
                             </Link>
@@ -103,13 +155,20 @@ function NavBar() {
                                 <Link
                                     key={cat.id}
                                     to={`/category/${cat.slug}`}
-                                    className="block px-4 py-2 hover:bg-slate-700"
+                                    className="
+                    block px-4 py-2
+                    text-cyan-300
+                    transition-colors
+                    hover:bg-cyan-500/10
+                    hover:text-cyan-200
+                "
                                 >
                                     {cat.name}
                                 </Link>
                             ))}
                         </div>
                     </div>
+
 
                 </div>
 
@@ -136,13 +195,18 @@ function NavBar() {
                     <button
                         type="submit"
                         className="
-                            px-5 py-2 rounded-lg
-                            bg-purple-600 text-white font-medium
-                            transition-all duration-300
-                            hover:bg-purple-700
-                            active:scale-95
-                            focus:bg-sky-500
-                        "
+    px-5 py-2 rounded-lg
+    bg-gradient-to-r from-cyan-500 to-blue-500
+    text-white font-medium
+
+    transition-all duration-200 ease-out
+
+    active:scale-[0.97]
+    active:shadow-[0_0_16px_rgba(34,211,238,0.45)]
+    active:shadow-[inset_0_0_8px_rgba(255,255,255,0.35)]
+
+    focus:outline-none
+  "
                     >
                         Search
                     </button>
@@ -153,54 +217,117 @@ function NavBar() {
 
                     {!isLoggedIn ? (
                         <>
-                            <Link to="/login" className="hover:underline">
+                            <Link
+                                to="/login"
+                                className="
+      px-4 py-1.5 rounded-lg
+      text-sm font-medium
+      text-cyan-300
+
+      border border-cyan-400/40
+      bg-slate-900
+
+      transition-all duration-200 ease-out
+
+      hover:bg-cyan-500/10
+      hover:text-cyan-200
+
+      active:scale-[0.96]
+      active:shadow-[0_0_12px_rgba(34,211,238,0.35)]
+    "
+                            >
                                 Login
                             </Link>
-                            <Link to="/signup" className="hover:underline">
+
+                            <Link
+                                to="/signup"
+                                className="
+      px-4 py-1.5 rounded-lg
+      text-sm font-medium
+      text-cyan-300
+
+      border border-cyan-400/40
+      bg-slate-900
+
+      transition-all duration-200 ease-out
+
+      hover:bg-cyan-500/10
+      hover:text-cyan-200
+
+      active:scale-[0.96]
+      active:shadow-[0_0_12px_rgba(34,211,238,0.35)]
+    "
+                            >
                                 Signup
                             </Link>
                         </>
+
                     ) : (
                         <button
                             onClick={handleLogout}
-                            className="hover:underline"
+                            className="
+    px-4 py-1.5 rounded-lg
+    text-sm font-medium
+    text-cyan-300
+
+    border border-cyan-400/40
+    bg-slate-900
+
+    transition-all duration-200 ease-out
+
+    hover:bg-cyan-500/10
+    hover:text-cyan-200
+
+    active:scale-[0.96]
+    active:shadow-[0_0_12px_rgba(34,211,238,0.35)]
+  "
                         >
                             Logout
                         </button>
+
                     )}
 
                     {/* Cart */}
                     <Link
                         to="/cart"
                         className="
-                            relative inline-flex items-center gap-2
-                            px-5 py-2.5 rounded-xl
-                            text-sm font-bold tracking-wide text-white
-                            bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500
-                            shadow-[0_0_18px_rgba(168,85,247,0.6)]
-                            hover:shadow-[0_0_35px_rgba(236,72,153,0.9)]
-                            active:scale-95
-                            transition-all duration-300
-                        "
+    relative inline-flex items-center gap-2
+    px-5 py-2.5 rounded-xl
+    text-sm font-bold tracking-wide text-white
+
+    bg-gradient-to-r from-cyan-500 to-blue-500
+
+    shadow-[0_0_16px_rgba(34,211,238,0.35)]
+    hover:shadow-[0_0_26px_rgba(34,211,238,0.55)]
+
+    active:scale-[0.97]
+    active:shadow-[0_0_20px_rgba(34,211,238,0.45)]
+
+    transition-all duration-300 ease-out
+  "
                     >
                         Your Cart
 
                         {cartCount > 0 && (
                             <span
                                 className="
-                                    absolute -top-2 -right-2
-                                    flex items-center justify-center
-                                    w-6 h-6 text-xs font-extrabold
-                                    text-white
-                                    bg-gradient-to-r from-red-500 to-pink-500
-                                    rounded-full
-                                    border border-white/30
-                                "
+        absolute -top-2 -right-2
+        flex items-center justify-center
+        w-6 h-6
+        text-xs font-extrabold text-white
+
+        bg-slate-900
+        border border-cyan-400/60
+        rounded-full
+
+        shadow-[0_0_10px_rgba(34,211,238,0.45)]
+      "
                             >
                                 {cartCount}
                             </span>
                         )}
                     </Link>
+
                 </div>
             </div>
         </nav>
