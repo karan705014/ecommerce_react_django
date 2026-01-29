@@ -8,21 +8,29 @@ function ProductDetails() {
     const { addToCart } = useCart();
     const navigate = useNavigate();
 
+    const [recommendations, setRecommendations] = useState([]);
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
     useEffect(() => {
+        setLoading(true);
+
         fetch(`${BASEURL}/api/products/${id}/`)
-            .then((res) => {
+            .then(res => {
                 if (!res.ok) throw new Error("Failed to fetch product");
                 return res.json();
             })
-            .then((data) => {
+            .then(data => {
                 setProduct(data);
+                return fetch(`${BASEURL}/api/recommend/${data.id}/`);
+            })
+            .then(res => res.json())
+            .then(recData => {
+                setRecommendations(recData);
                 setLoading(false);
             })
-            .catch((err) => {
+            .catch(err => {
                 setError(err.message);
                 setLoading(false);
             });
@@ -96,7 +104,6 @@ function ProductDetails() {
                         {product.description}
                     </p>
 
-                    {/* Add to Cart */}
                     <button
                         onClick={handleAddToCart}
                         className="
@@ -104,20 +111,16 @@ function ProductDetails() {
                             px-6 py-3 rounded-xl
                             font-semibold text-white
                             bg-gradient-to-r from-cyan-500 to-blue-500
-
                             shadow-[0_0_20px_rgba(34,211,238,0.4)]
                             hover:shadow-[0_0_32px_rgba(34,211,238,0.6)]
-
                             active:scale-[0.97]
                             active:shadow-[0_0_40px_rgba(34,211,238,0.8)]
-
                             transition-all duration-300
                         "
                     >
                         Add to Cart
                     </button>
 
-                    {/* Back Button */}
                     <div className="mt-4">
                         <Link to="/">
                             <button
@@ -126,10 +129,8 @@ function ProductDetails() {
                                     text-cyan-300 font-medium
                                     bg-slate-900
                                     border border-cyan-400/30
-
                                     hover:bg-cyan-500/10
                                     active:scale-[0.96]
-
                                     transition-all
                                 "
                             >
@@ -139,6 +140,39 @@ function ProductDetails() {
                     </div>
                 </div>
             </div>
+
+            {/* Recommendations */}
+            {recommendations.length > 0 && (
+                <div className="mt-14">
+                    <h3 className="text-2xl font-bold text-cyan-300 mb-6">
+                        Recommended for you
+                    </h3>
+
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                        {recommendations.map(item => (
+                            <Link
+                                key={item.id}
+                                to={`/products/${item.id}`}
+                                className="
+                                    bg-slate-900/80 border border-cyan-400/20
+                                    rounded-xl p-3 hover:scale-105
+                                    transition-all block
+                                "
+                            >
+                                <img
+                                    src={item.image}
+                                    alt={item.name}
+                                    className="h-40 w-full object-contain bg-slate-800 rounded"
+                                />
+                                <p className="mt-2 text-gray-100 font-semibold">
+                                    {item.name}
+                                </p>
+                                <p className="text-cyan-300">₹{item.price}</p>
+                            </Link>
+                        ))}
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

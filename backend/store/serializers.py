@@ -7,11 +7,13 @@ class CategorySerializer(serializers.ModelSerializer):
         model= Category
         fields ='__all__'
 
+
 class ProductSerializer(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)
     class Meta:
          model= Product
          fields ='__all__'
+
 
 class CartItemSerializer(serializers.ModelSerializer):
     product_name = serializers.CharField(source='product.name',read_only=True)
@@ -24,6 +26,8 @@ class CartItemSerializer(serializers.ModelSerializer):
 
 class CartSerializer(serializers.ModelSerializer):
     #HERE CART ITEM SERIALIZEER  INCLUDE ALL THINS IN THE CARTITEM MODEL
+    #items mean cart.items.all()  related_name='items' in CartItem model
+    #its insclude all cartitems that belong to cart comes from view
     items = CartItemSerializer(many=True,read_only=True)
     total = serializers.ReadOnlyField()
 
@@ -31,10 +35,12 @@ class CartSerializer(serializers.ModelSerializer):
         model = Cart
         fields = '__all__'
 
+
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id','username','email']
+
 
 class RegisterSerializer(serializers.ModelSerializer):
     password =serializers.CharField(write_only=True)
@@ -55,3 +61,18 @@ class RegisterSerializer(serializers.ModelSerializer):
         password = validated_data['password']
         user = User.objects.create_user(username=username,email=email,password=password)
         return user
+
+class ForgotPasswordSerializer(serializers.Serializer):
+    username =serializers.CharField()
+
+
+class ResetPasswordSerializer(serializers.Serializer):
+    new_password = serializers.CharField()
+    confirm_password = serializers.CharField()
+
+    def validate(self, attrs):
+        if attrs['new_password'] != attrs['confirm_password']:
+            raise serializers.ValidationError("Passwords do not match")
+        return attrs
+
+

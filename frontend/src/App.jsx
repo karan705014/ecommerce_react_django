@@ -8,6 +8,9 @@ import PrivateRouter from "./components/PrivateRouter.jsx";
 import Login from "./pages/Login.jsx";
 import Signup from "./pages/Signup.jsx";
 import Home from "./pages/Home.jsx";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
+
 function App() {
   return (
     <Router>
@@ -17,6 +20,8 @@ function App() {
         <Route path="/category/:slug" element={<Home />} />
         <Route path="/products/:id" element={<ProductDetails />} />
         <Route path="/cart" element={<CartPage />} />
+        <Route path="/reset/password" element={<ForgotPassword />} />
+        <Route path="/reset/password/:uidb64/:token" element={<ResetPassword />} />
         <Route element={<PrivateRouter />}>
           <Route path="/checkout" element={<CheackoutPage />} />
         </Route>

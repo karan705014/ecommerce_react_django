@@ -121,6 +121,16 @@ function Login() {
                     >
                         Login
                     </button>
+
+                    <p
+                        onClick={() => navigate("/reset/password")}
+                        className="
+                            text-right text-sm text-cyan-400 cursor-pointer hover:text-cyan-300 transition
+                        "
+                    >
+                        Forgot password?
+                    </p>
+
                 </form>
 
                 {/* Message */}

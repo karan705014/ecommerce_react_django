@@ -17,6 +17,6 @@ urlpatterns = [
     path('cart/remove/',views.remove_from_cart),
     path('cart/update/', views.update_cart_quantity),
     path ('orders/create/', views.create_order),
-
-
+    path('reset/password/', views.forgot_password),
+    path('reset/password/<uidb64>/<token>/', views.reset_password),
 ]

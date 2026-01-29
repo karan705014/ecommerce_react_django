@@ -5,10 +5,18 @@ from .models import Product,Category,Cart,CartItem,Order,OrderItem
 from rest_framework.decorators import api_view,permission_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.contrib.auth.models import User
-from . serializers import CategorySerializer,ProductSerializer,CartItemSerializer,CartSerializer,RegisterSerializer,UserSerializer
-
-
+from .serializers import CategorySerializer,ProductSerializer,CartItemSerializer,CartSerializer,RegisterSerializer,UserSerializer
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes, force_str
+from .tokens import password_reset_token
+from .serializers import ForgotPasswordSerializer,ResetPasswordSerializer
 from django.core.paginator import Paginator
+from dotenv import load_dotenv
+load_dotenv()
+import os
+from django.core.mail import send_mail
+from django.conf import settings
+FRONTEND_URL = os.getenv("frontend_url")
 
 @api_view(['GET'])
 def get_products(request):
@@ -179,3 +187,51 @@ def register(request):
         user = serializer.save()
         return Response({"message":"User registered successfully","user":UserSerializer(user).data},status=status.HTTP_201_CREATED)
     return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def forgot_password(request):
+    serializer = ForgotPasswordSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    username = serializer.validated_data['username']
+    try:
+        user = User.objects.get(username = username)
+    except User.DoesNotExist:
+        return Response({'error': 'user not found'},status=status.HTTP_404_NOT_FOUND)
+
+    uid = urlsafe_base64_encode(force_bytes(user.pk))
+    token = password_reset_token.make_token(user)
+    reset_link = f"{FRONTEND_URL.rstrip('/')}/reset/password/{uid}/{token}/"
+
+    # send confirmation emails
+    print("password reset link:", reset_link)
+    subject = "Password Reset"
+    messaage = f"Dear {user.username},\n\n This is Your Password Resetlink:\n{reset_link}\n\n If you did not request this, please ignore this email.\n\n Best regards,\n Your KRN ZONE Team"
+    send_mail(subject, messaage, settings.EMAIL_HOST_USER, [user.email], fail_silently=True)
+
+    return Response(
+        {"message": "Password reset link sent"},
+        status=status.HTTP_200_OK
+    )
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def reset_password(request,uidb64,token):
+    serilizer = ResetPasswordSerializer(data=request.data)
+    serilizer.is_valid(raise_exception=True)
+
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        return Response({'error': 'Invalid User'},status=status.HTTP_400_BAD_REQUEST)
+
+    #token verification
+    if not password_reset_token.check_token(user, token):
+        return Response({'error': 'Invalid or expired token'},status=status.HTTP_400_BAD_REQUEST)
+    #validated data that comes form the serializers
+    user.set_password(serilizer.validated_data['new_password'])
+    user.save()
+    return Response({'message': 'Password reset successfully'},status=status.HTTP_200_OK)
