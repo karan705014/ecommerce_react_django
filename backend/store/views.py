@@ -17,6 +17,12 @@ import os
 from django.core.mail import send_mail
 from django.conf import settings
 FRONTEND_URL = os.getenv("frontend_url")
+from .tasks import send_order_confirmation_email
+
+
+
+
+
 
 @api_view(['GET'])
 def get_products(request):
@@ -174,6 +180,9 @@ def create_order(request):
 
         #clear the cart
         cart.items.all().delete()
+        #send order email to background task using celery
+        send_order_confirmation_email.delay(order.id)
+
         return Response({'message':'Order created successfully','order_id': order.id},status=status.HTTP_201_CREATED)
     except Exception as e:
         return Response({'error':str(e)},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
