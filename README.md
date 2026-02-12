@@ -44,6 +44,21 @@ like product recommendation scoring.
 - Clean & modular code structure
 
 ---
+##  Asynchronous Task Processing
+
+This project uses **Celery** with **Redis** as a message broker for handling background tasks.
+
+### Use Cases:
+- Order confirmation email sending
+- Heavy operations processing
+- Background job execution
+
+### Why Celery?
+- Improves performance
+- Non-blocking API response
+- Scalable architecture
+
+---
 
 ##  Recommendation System (Important Part)
 
