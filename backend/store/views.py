@@ -5,12 +5,13 @@ from .models import Product,Category,Cart,CartItem,Order,OrderItem
 from rest_framework.decorators import api_view,permission_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.contrib.auth.models import User
-from .serializers import CategorySerializer,ProductSerializer,CartItemSerializer,CartSerializer,RegisterSerializer,UserSerializer
+from .serializers import AdressSerializer, CategorySerializer,ProductSerializer,CartItemSerializer,CartSerializer,RegisterSerializer,UserSerializer
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 from .tokens import password_reset_token
 from .serializers import ForgotPasswordSerializer,ResetPasswordSerializer
 from django.core.paginator import Paginator
+from .models import Address
 from dotenv import load_dotenv
 load_dotenv()
 import os
@@ -64,11 +65,14 @@ def get_products(request):
     }, status=status.HTTP_200_OK)
 
 
+
+
 @api_view(['GET'])
 def get_categories(request):
     products= Category.objects.all()
     serializer = CategorySerializer(products,many=True)
     return Response(serializer.data)
+
 
 
 @api_view(['GET'])
@@ -147,46 +151,80 @@ def remove_from_cart(request):
 @permission_classes([IsAuthenticated])
 def create_order(request):
     try:
-        data = request.data
-        name = data.get('name')
-        address = data.get('address')
-        phone = data.get('phone')
-        payment_method = data.get('payment_method','COD')
+        # Get Data
+        address_id = request.data.get("address_id")
+        payment_method = request.data.get("payment_method", "COD")
 
-        #validate phone number
-        if not phone.isdigit() or len(phone) < 10:
-            return Response({'error':'Invalid phone number'},status=status.HTTP_400_BAD_REQUEST)
-        #get user cart
-        cart ,created = Cart.objects.get_or_create(user=request.user)
-        if not cart.items.exists():
-            return Response({'error':'Cart is empty'},status=status.HTTP_400_BAD_REQUEST)
-
-        total = sum([item.product.price * item.quantity for item in cart.items.all()])
-        order = Order.objects.create(
-            user = request.user,
-            name = name,
-            address = address,
-            phone = phone,
-            payment_method = payment_method,
-            total_amount = total
-        )
-        for item in cart.items.all():
-            OrderItem.objects.create(
-                order = order,
-                product = item.product,
-                quantity = item.quantity,
-                price = item.product.price
+        if not address_id:
+            return Response(
+                {"error": "address_id is required"},
+                status=status.HTTP_400_BAD_REQUEST
             )
 
-        #clear the cart
+        # Validate Address (Security Important)
+        try:
+            address = Address.objects.get(
+                id=address_id,
+                user=request.user
+            )
+        except Address.DoesNotExist:
+            return Response(
+                {"error": "Invalid address"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        #  Get User Cart
+        cart, created = Cart.objects.get_or_create(user=request.user)
+
+        if not cart.items.exists():
+            return Response(
+                {"error": "Cart is empty"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Calculate Total
+        total = sum(
+            item.product.price * item.quantity
+            for item in cart.items.all()
+        )
+
+        #  Create Order
+        order = Order.objects.create(
+            user=request.user,
+            address=address,
+            payment_method=payment_method,
+            total_amount=total
+        )
+
+        # Create Order Items
+        for item in cart.items.all():
+            OrderItem.objects.create(
+                order=order,
+                product=item.product,
+                quantity=item.quantity,
+                price=item.product.price
+            )
+
+        #  Clear Cart
         cart.items.all().delete()
-        #send order email to background task using celery
+
+        #  Send Email via Celery
         send_order_confirmation_email.delay(order.id)
 
-        return Response({'message':'Order created successfully','order_id': order.id},status=status.HTTP_201_CREATED)
-    except Exception as e:
-        return Response({'error':str(e)},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response(
+            {
+                "message": "Order created successfully",
+                "order_id": order.id,
+                "delivery_phone": address.phone
+            },
+            status=status.HTTP_201_CREATED
+        )
 
+    except Exception as e:
+        return Response(
+            {"error": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -244,3 +282,21 @@ def reset_password(request,uidb64,token):
     user.set_password(serilizer.validated_data['new_password'])
     user.save()
     return Response({'message': 'Password reset successfully'},status=status.HTTP_200_OK)
+
+
+
+@api_view(["GET", "POST"])
+@permission_classes([IsAuthenticated])
+def address_list_create(request):
+
+    if request.method == "GET":
+        addresses = Address.objects.filter(user=request.user)
+        serializer = AdressSerializer(addresses, many=True)
+        return Response(serializer.data)
+
+    if request.method == "POST":
+        serializer = AdressSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(user=request.user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

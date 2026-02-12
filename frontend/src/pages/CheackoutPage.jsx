@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { authFetch } from "../utils/auth";
 import { useCart } from "../context/CartContext";
@@ -8,189 +8,165 @@ function CheckoutPage() {
   const navigate = useNavigate();
   const { clearCart } = useCart();
 
-  const [form, setForm] = useState({
-    name: "",
-    address: "",
-    phone: "",
-    payment_method: "COD",
-  });
+  const [addresses, setAddresses] = useState([]);
+  const [selectedAddress, setSelectedAddress] = useState(null);
+  const [paymentMethod, setPaymentMethod] = useState("COD");
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [showBanner, setShowBanner] = useState(false);
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+  // Fetch addresses
+  const fetchAddresses = async () => {
+    try {
+      const res = await authFetch(`${BASEURL}/api/addresses/`);
+      if (res.ok) {
+        const data = await res.json();
+        setAddresses(data);
+        if (data.length > 0) {
+          setSelectedAddress(data[0].id);
+        }
+      }
+    } catch {
+      setAddresses([]);
+    }
   };
 
+  useEffect(() => {
+    fetchAddresses();
+  }, []);
+
+  // Redirect effect
+  useEffect(() => {
+    if (showBanner) {
+      const timer = setTimeout(() => {
+        navigate("/");
+      }, 1500);
+
+      return () => clearTimeout(timer);
+    }
+  }, [showBanner, navigate]);
+
+  // Place order
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!selectedAddress) {
+      setMessage("Please select a delivery address.");
+      return;
+    }
+
     setLoading(true);
-    setMessage("");
 
     try {
       const res = await authFetch(`${BASEURL}/api/orders/create/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({
+          address_id: selectedAddress,
+          payment_method: paymentMethod,
+        }),
       });
 
-      if (res.ok) {
-        setMessage("✅ Order placed successfully!");
-        clearCart();
-        setTimeout(() => navigate("/"), 1800);
+      const data = await res.json();
+
+      if (!res.ok) {
+        setMessage(data.error || "Order failed.");
       } else {
-        setMessage("❌ Error placing order. Try again.");
+        clearCart();
+        setMessage(" Order placed successfully!");
+        setShowBanner(true);
       }
+
     } catch {
-      setMessage("⚠ Server error. Please try again.");
+      setMessage("Server error. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 flex items-center justify-center px-4 pt-24">
-      <div
-        className="
-          w-full max-w-md
-          bg-slate-900/80 backdrop-blur-xl
-          border border-cyan-400/30
-          rounded-2xl p-8
-          shadow-[0_0_40px_rgba(34,211,238,0.25)]
-        "
-      >
-        {/* Header */}
-        <h1
-          className="
-            text-3xl font-extrabold text-center mb-2
-            bg-gradient-to-r from-cyan-400 to-blue-500
-            text-transparent bg-clip-text tracking-widest
-          "
-        >
-          CHECKOUT
-        </h1>
-        <p className="text-center text-gray-400 text-sm mb-6">
-          Complete your order details
-        </p>
+    <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center px-4 pt-24">
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
-
-          {/* Name */}
-          <div>
-            <label className="block text-sm text-gray-300 mb-1">
-              Full Name
-            </label>
-            <input
-              type="text"
-              name="name"
-              value={form.name}
-              onChange={handleChange}
-              required
-              placeholder="Karan Singh"
-              className="
-                w-full rounded-lg
-                bg-slate-800 text-white
-                border border-cyan-400/20
-                px-3 py-2 text-sm
-                focus:outline-none
-                focus:ring-2 focus:ring-cyan-400/60
-              "
-            />
+      {/*  TOP SUCCESS BANNER */}
+      {showBanner && (
+        <div className="fixed top-6 bg-slate-800 border border-green-500 text-green-400 px-6 py-3 rounded-xl shadow-2xl backdrop-blur-md animate-fade-in z-50">
+          <div className="flex items-center gap-2">
+            <span className="text-lg">✔</span>
+            <span className="font-medium">{message}</span>
           </div>
+        </div>
+      )}
+
+
+      {/*  ERROR MESSAGE */}
+      {!showBanner && message && (
+        <div className="mb-4 text-red-400 text-sm text-center">
+          {message}
+        </div>
+      )}
+
+      <div className="w-full max-w-md bg-slate-900 border border-slate-700 rounded-xl p-8">
+
+        <h1 className="text-2xl font-semibold text-white text-center mb-6">
+          Checkout
+        </h1>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
 
           {/* Address */}
           <div>
-            <label className="block text-sm text-gray-300 mb-1">
-              Address
+            <label className="block text-sm text-gray-400 mb-3">
+              Delivery Address
             </label>
-            <textarea
-              name="address"
-              value={form.address}
-              onChange={handleChange}
-              required
-              rows="2"
-              placeholder="House no, Street, City"
-              className="
-                w-full rounded-lg
-                bg-slate-800 text-white
-                border border-cyan-400/20
-                px-3 py-2 text-sm
-                focus:outline-none
-                focus:ring-2 focus:ring-cyan-400/60
-              "
-            />
-          </div>
 
-          {/* Phone */}
-          <div>
-            <label className="block text-sm text-gray-300 mb-1">
-              Phone Number
-            </label>
-            <input
-              type="tel"
-              name="phone"
-              value={form.phone}
-              onChange={handleChange}
-              required
-              placeholder="9876543210"
-              className="
-                w-full rounded-lg
-                bg-slate-800 text-white
-                border border-cyan-400/20
-                px-3 py-2 text-sm
-                focus:outline-none
-                focus:ring-2 focus:ring-cyan-400/60
-              "
-            />
+            {addresses.length === 0 ? (
+              <p className="text-sm text-gray-400">No saved addresses.</p>
+            ) : (
+              addresses.map(addr => (
+                <div
+                  key={addr.id}
+                  onClick={() => setSelectedAddress(addr.id)}
+                  className={`p-3 mb-3 rounded border cursor-pointer ${selectedAddress === addr.id
+                    ? "border-cyan-500"
+                    : "border-slate-700"
+                    }`}
+                >
+                  <p className="text-white font-medium">{addr.full_name}</p>
+                  <p className="text-sm text-gray-400">{addr.address_line}</p>
+                  <p className="text-sm text-gray-400">
+                    {addr.city}, {addr.state} - {addr.postal_code}
+                  </p>
+                  <p className="text-sm text-gray-400">{addr.phone}</p>
+                </div>
+              ))
+            )}
           </div>
 
           {/* Payment */}
           <div>
-            <label className="block text-sm text-gray-300 mb-1">
+            <label className="block text-sm text-gray-400 mb-2">
               Payment Method
             </label>
             <select
-              name="payment_method"
-              value={form.payment_method}
-              onChange={handleChange}
-              className="
-                w-full rounded-lg
-                bg-slate-800 text-white
-                border border-cyan-400/20
-                px-3 py-2 text-sm
-                focus:outline-none
-                focus:ring-2 focus:ring-cyan-400/60
-              "
+              value={paymentMethod}
+              onChange={(e) => setPaymentMethod(e.target.value)}
+              className="w-full bg-slate-800 p-2 rounded text-white"
             >
               <option value="COD">Cash on Delivery</option>
               <option value="ONLINE">Online Payment</option>
             </select>
           </div>
 
-          {/* Button */}
+          {/* Submit */}
           <button
             type="submit"
             disabled={loading}
-            className="
-              w-full mt-4 py-3 rounded-xl
-              font-bold text-white
-              bg-gradient-to-r from-cyan-500 to-blue-500
-              shadow-[0_0_20px_rgba(34,211,238,0.4)]
-              hover:shadow-[0_0_32px_rgba(34,211,238,0.6)]
-              active:scale-[0.97]
-              transition-all duration-300
-              disabled:opacity-50
-            "
+            className="w-full bg-cyan-600 py-3 rounded text-white font-medium disabled:opacity-50"
           >
             {loading ? "Processing..." : "Place Order"}
           </button>
 
-          {message && (
-            <p className="text-center text-sm mt-3 text-cyan-300 font-semibold">
-              {message}
-            </p>
-          )}
         </form>
       </div>
     </div>

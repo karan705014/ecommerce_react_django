@@ -7,27 +7,36 @@ from .models import Order
 def send_order_confirmation_email(order_id):
     try:
         order = Order.objects.get(id=order_id)
+    except Order.DoesNotExist:
+        return "Order not found"
 
-        if not order.user.email:
-            return "No email found"
+    items = order.items.all()
 
-        subject = "Order Confirmation"
-        message = (
-            f"Dear {order.name},\n\n"
-            f"Your order has been confirmed.\n"
-            f"Order ID: {order.id}\n\n"
-            f"KRN ZONE Team"
-        )
+    item_list = ""
+    for item in items:
+        item_list += f"- {item.product.name} (x{item.quantity})\n"
 
-        send_mail(
-            subject,
-            message,
-            settings.EMAIL_HOST_USER,
-            [order.user.email],
-            fail_silently=False
-        )
+    subject = "Order Confirmation"
 
-        return "Email sent"
+    message = f"""
+Hi {order.user.username},
 
-    except Exception as e:
-        return str(e)
+Your order #{order.id} has been confirmed!
+
+Items:
+{item_list}
+
+Total Amount: ₹{order.total_amount}
+
+Thank you for shopping with us!
+"""
+
+    send_mail(
+        subject,
+        message,
+        settings.EMAIL_HOST_USER,
+        [order.user.email],
+        fail_silently=False
+    )
+
+    return "Email sent successfully"

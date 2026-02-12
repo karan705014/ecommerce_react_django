@@ -19,4 +19,6 @@ urlpatterns = [
     path ('orders/create/', views.create_order),
     path('reset/password/', views.forgot_password),
     path('reset/password/<uidb64>/<token>/', views.reset_password),
+    path("addresses/", views.address_list_create),
+
 ]

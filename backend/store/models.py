@@ -20,6 +20,23 @@ class Product(models.Model):
             return self.name
 
 
+class Address(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="addresses")
+
+    full_name = models.CharField(max_length=255)
+    phone = models.CharField(max_length=15)
+
+    address_line = models.TextField()
+    city = models.CharField(max_length=100)
+    state = models.CharField(max_length=100)
+    postal_code = models.CharField(max_length=20)
+
+    is_default = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.full_name} - {self.city}"
+
+
 
 class Cart(models.Model):
         user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -58,9 +75,7 @@ class UserProfile(models.Model):
 
 class Order(models.Model):
         user = models.ForeignKey(User,on_delete=models.CASCADE)
-        name = models.CharField(max_length=100, blank=True, null=True)
-        address = models.TextField(blank=True, null=True)
-        phone = models.CharField(max_length=15, blank=True, null=True)
+        address = models.ForeignKey(Address, on_delete=models.SET_NULL, null=True)
         payment_method = models.CharField(max_length=30, default="COD")
         total_amount = models.DecimalField(max_digits=10, decimal_places=2)
         created_at = models.DateTimeField(auto_now_add=True)
