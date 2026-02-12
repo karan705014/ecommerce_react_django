@@ -44,6 +44,21 @@ like product recommendation scoring.
 - Clean & modular code structure
 
 ---
+##  Asynchronous Task Processing
+
+This project uses **Celery** with **Redis** as a message broker for handling background tasks.
+
+### Use Cases:
+- Order confirmation email sending
+- Heavy operations processing
+- Background job execution
+
+### Why Celery?
+- Improves performance
+- Non-blocking API response
+- Scalable architecture
+
+---
 
 ##  Recommendation System (Important Part)
 
@@ -87,3 +102,16 @@ source venv/bin/activate   # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 python manage.py migrate
 python manage.py runserver
+
+
+##  Setup Celery & Redis
+
+1. Install Redis
+2. Start Redis server:
+   redis-server
+
+3. Run Celery worker:
+   celery -A project_name worker --loglevel=info
+
+4. Run Django server:
+   python manage.py runserver
