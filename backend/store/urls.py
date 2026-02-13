@@ -20,5 +20,6 @@ urlpatterns = [
     path('reset/password/', views.forgot_password),
     path('reset/password/<uidb64>/<token>/', views.reset_password),
     path("addresses/", views.address_list_create),
+    path("addresses/<int:pk>/", views.address_delete),
 
 ]

@@ -60,44 +60,47 @@ function ProductDetails() {
         addToCart(product.id);
     };
 
+    const stock = product.available_stock;
+
     return (
         <div className="min-h-screen bg-slate-900 px-6 pt-28 pb-12">
-            <div
-                className="
-                    max-w-4xl mx-auto
-                    bg-slate-900/80 backdrop-blur-xl
-                    rounded-2xl p-6
-                    border border-cyan-400/30
-                    shadow-[0_0_35px_rgba(34,211,238,0.25)]
-                    flex flex-col md:flex-row gap-8
-                "
-            >
-                {/* Product Image */}
+            <div className="max-w-4xl mx-auto bg-slate-900/80 backdrop-blur-xl rounded-2xl p-6 border border-cyan-400/30 shadow-[0_0_35px_rgba(34,211,238,0.25)] flex flex-col md:flex-row gap-8">
+
                 <img
-                    className="
-                        w-full md:w-1/2 h-80 object-cover
-                        rounded-xl
-                        border border-cyan-400/20
-                        shadow-[0_0_18px_rgba(34,211,238,0.25)]
-                    "
+                    className="w-full md:w-1/2 h-80 object-cover rounded-xl border border-cyan-400/20 shadow-[0_0_18px_rgba(34,211,238,0.25)]"
                     src={product.image}
                     alt={product.name}
                 />
 
-                {/* Product Info */}
                 <div className="flex-1 text-gray-100">
-                    <h2
-                        className="
-                            text-3xl font-extrabold tracking-wide
-                            bg-gradient-to-r from-cyan-400 to-blue-500
-                            text-transparent bg-clip-text
-                        "
-                    >
+
+                    <h2 className="text-3xl font-extrabold tracking-wide bg-gradient-to-r from-cyan-400 to-blue-500 text-transparent bg-clip-text">
                         {product.name}
                     </h2>
 
                     <p className="text-2xl text-cyan-300 font-semibold mt-3">
                         ₹{product.price}
+                    </p>
+
+                    {/*  STOCK DISPLAY */}
+                    <p className="mt-2 font-medium">
+                        {stock === 0 && (
+                            <span className="text-red-400 font-semibold">
+                                Out of Stock
+                            </span>
+                        )}
+
+                        {stock > 0 && stock <= 5 && (
+                            <span className="text-yellow-400 font-semibold">
+                                Only {stock} left
+                            </span>
+                        )}
+
+                        {stock > 5 && (
+                            <span className="text-green-400">
+                                {stock} in stock
+                            </span>
+                        )}
                     </p>
 
                     <p className="text-gray-300 mt-4 leading-relaxed">
@@ -106,73 +109,30 @@ function ProductDetails() {
 
                     <button
                         onClick={handleAddToCart}
-                        className="
+                        disabled={stock === 0}
+                        className={`
                             mt-6 w-full sm:w-auto
                             px-6 py-3 rounded-xl
                             font-semibold text-white
-                            bg-gradient-to-r from-cyan-500 to-blue-500
-                            shadow-[0_0_20px_rgba(34,211,238,0.4)]
-                            hover:shadow-[0_0_32px_rgba(34,211,238,0.6)]
-                            active:scale-[0.97]
-                            active:shadow-[0_0_40px_rgba(34,211,238,0.8)]
                             transition-all duration-300
-                        "
+                            ${stock === 0
+                                ? "bg-gray-600 cursor-not-allowed"
+                                : "bg-gradient-to-r from-cyan-500 to-blue-500 shadow-[0_0_20px_rgba(34,211,238,0.4)] hover:shadow-[0_0_32px_rgba(34,211,238,0.6)] active:scale-[0.97]"
+                            }
+                        `}
                     >
-                        Add to Cart
+                        {stock === 0 ? "Out of Stock" : "Add to Cart"}
                     </button>
 
                     <div className="mt-4">
                         <Link to="/">
-                            <button
-                                className="
-                                    px-6 py-3 rounded-lg
-                                    text-cyan-300 font-medium
-                                    bg-slate-900
-                                    border border-cyan-400/30
-                                    hover:bg-cyan-500/10
-                                    active:scale-[0.96]
-                                    transition-all
-                                "
-                            >
+                            <button className="px-6 py-3 rounded-lg text-cyan-300 font-medium bg-slate-900 border border-cyan-400/30 hover:bg-cyan-500/10 active:scale-[0.96] transition-all">
                                 ← Back to Home
                             </button>
                         </Link>
                     </div>
                 </div>
             </div>
-
-            {/* Recommendations */}
-            {recommendations.length > 0 && (
-                <div className="mt-14">
-                    <h3 className="text-2xl font-bold text-cyan-300 mb-6">
-                        Recommended for you
-                    </h3>
-
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                        {recommendations.map(item => (
-                            <Link
-                                key={item.id}
-                                to={`/products/${item.id}`}
-                                className="
-                                    bg-slate-900/80 border border-cyan-400/20
-                                    rounded-xl p-3 hover:scale-105
-                                    transition-all block
-                                "
-                            >
-                                <img
-                                    src={item.image}
-                                    alt={item.name}
-                                    className="h-40 w-full object-contain bg-slate-800 rounded"
-                                />
-                                <p className="mt-2 text-gray-100 font-semibold">
-                                    {item.name}
-                                </p>
-                                <p className="text-cyan-300">₹{item.price}</p>
-                            </Link>
-                        ))}
-                    </div>
-                </div>
-            )}
         </div>
     );
 }

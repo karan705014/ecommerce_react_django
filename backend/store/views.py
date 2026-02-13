@@ -10,6 +10,8 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 from .tokens import password_reset_token
 from .serializers import ForgotPasswordSerializer,ResetPasswordSerializer
+from django.db import transaction
+from django.db.models import F
 from django.core.paginator import Paginator
 from .models import Address
 from dotenv import load_dotenv
@@ -150,8 +152,8 @@ def remove_from_cart(request):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def create_order(request):
+
     try:
-        # Get Data
         address_id = request.data.get("address_id")
         payment_method = request.data.get("payment_method", "COD")
 
@@ -161,7 +163,6 @@ def create_order(request):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # Validate Address (Security Important)
         try:
             address = Address.objects.get(
                 id=address_id,
@@ -173,7 +174,6 @@ def create_order(request):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        #  Get User Cart
         cart, created = Cart.objects.get_or_create(user=request.user)
 
         if not cart.items.exists():
@@ -182,40 +182,61 @@ def create_order(request):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # Calculate Total
-        total = sum(
-            item.product.price * item.quantity
-            for item in cart.items.all()
-        )
+        with transaction.atomic():
+            total = 0
 
-        #  Create Order
-        order = Order.objects.create(
-            user=request.user,
-            address=address,
-            payment_method=payment_method,
-            total_amount=total
-        )
+            # LOCK PRODUCTS FIRST
+            cart_items = cart.items.select_related('product')
 
-        # Create Order Items
-        for item in cart.items.all():
-            OrderItem.objects.create(
-                order=order,
-                product=item.product,
-                quantity=item.quantity,
-                price=item.product.price
+            for item in cart_items:
+                product = Product.objects.select_for_update().get(id=item.product.id)
+
+                available_stock = product.stock - product.reserved_stock
+
+                if available_stock < item.quantity:
+                    return Response(
+                        {"error": f"Insufficient stock for {product.name}"},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+
+            #  CREATE ORDER
+            order = Order.objects.create(
+                user=request.user,
+                address=address,
+                payment_method=payment_method,
+                total_amount=0,
+                status="PENDING"
             )
 
-        #  Clear Cart
-        cart.items.all().delete()
+            # RESERVE STOCK + CREATE ORDER ITEMS
+            for item in cart_items:
+                product = Product.objects.select_for_update().get(id=item.product.id)
 
-        #  Send Email via Celery
+                # Reserve Stock
+                product.reserved_stock = F('reserved_stock') + item.quantity
+                product.save()
+
+                total += item.product.price * item.quantity
+
+                OrderItem.objects.create(
+                    order=order,
+                    product=product,
+                    quantity=item.quantity,
+                    price=item.product.price
+                )
+
+            order.total_amount = total
+            order.save()
+
+            # Clear cart
+            cart.items.all().delete()
+
         send_order_confirmation_email.delay(order.id)
 
         return Response(
             {
-                "message": "Order created successfully",
+                "message": "Order created & stock reserved successfully",
                 "order_id": order.id,
-                "delivery_phone": address.phone
             },
             status=status.HTTP_201_CREATED
         )
@@ -225,6 +246,8 @@ def create_order(request):
             {"error": str(e)},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
+
+
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -300,3 +323,13 @@ def address_list_create(request):
             serializer.save(user=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(["DELETE"])
+@permission_classes([IsAuthenticated])
+def address_delete(request, pk):
+    try:
+        address = Address.objects.get(id=pk, user=request.user)
+        address.delete()
+        return Response({"message": "Deleted"}, status=204)
+    except Address.DoesNotExist:
+        return Response({"error": "Not found"}, status=404)

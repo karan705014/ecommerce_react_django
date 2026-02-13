@@ -16,9 +16,14 @@ class AdressSerializer(serializers.ModelSerializer):
 
 class ProductSerializer(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)
+    available_stock = serializers.SerializerMethodField()
     class Meta:
-         model= Product
-         fields ='__all__'
+        model = Product
+        fields = '__all__'
+
+    def get_available_stock(self, obj):
+        return obj.stock - obj.reserved_stock
+
 
 
 class CartItemSerializer(serializers.ModelSerializer):
