@@ -90,6 +90,39 @@ This shows how **low-level optimization** can be integrated into a real-world Dj
 This approach improves response time and demonstrates **performance-oriented backend development**.
 
 ---
+---
+🔒 Concurrency-Safe Stock Reservation
+
+To prevent overselling during simultaneous orders, a production-style stock reservation system has been implemented.
+
+✅ Key Concepts Used:
+
+transaction.atomic() → Ensures database consistency (all-or-nothing execution)
+
+select_for_update() → Applies row-level locking to prevent concurrent stock modification
+
+F() expressions → Performs safe atomic database-level increments
+
+reserved_stock field → Handles pending payment reservations before final confirmation
+
+💡 How It Works:
+
+Products are locked using select_for_update()
+
+Available stock is validated (stock - reserved_stock)
+
+Reserved stock is increased safely using F() expressions
+
+All operations run inside a single atomic transaction
+
+🚀 Result:
+
+No overselling
+
+Concurrency-safe transactions
+
+Production-ready inventory handling
+---
 
 ##  Installation & Setup
 
