@@ -28,8 +28,8 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ["karansinghbhumihar70501462.onrender.com", "localhost", "127.0.0.1"]
 
+ALLOWED_HOSTS = ["ecommerce-react-django-4ogf.onrender.com", "localhost", "127.0.0.1"]
 
 # Application definition
 
