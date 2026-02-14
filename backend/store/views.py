@@ -233,7 +233,8 @@ def create_order(request):
             # Clear cart
             cart.items.all().delete()
 
-        send_order_confirmation_email.delay(order.id)
+        if os.environ.get("RENDER") is None:
+            send_order_confirmation_email.delay(order.id)
 
         return Response(
             {

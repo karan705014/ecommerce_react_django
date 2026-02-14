@@ -24,12 +24,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-u$t@31jnuj6kiyobb%%ns1fds1fzh_u6-_*1o7q@bk55s2=+w6'
-
+SECRET_KEY = os.getenv("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = [".onrender.com", "localhost", "127.0.0.1"]
 
 
 # Application definition
@@ -168,7 +167,13 @@ EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 
 
 # CELERY SETTINGS
-CELERY_BROKER_URL = "redis://127.0.0.1:6379/0" #celary send task to redis server
+if os.environ.get("RENDER") is None:
+    # Local development
+    CELERY_BROKER_URL = "redis://127.0.0.1:6379/0"
+else:
+    # Production (disable celery)
+    CELERY_BROKER_URL = None
+ #celary send task to redis server
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 
