@@ -136,7 +136,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CORS_ALLOW_ALL_ORIGINS = False
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
+    "https://karansinghbhumiharreactdjango.vercel.app",
 ]
 
 MEDIA_URL ='/media/'
@@ -181,7 +181,9 @@ CELERY_TASK_SERIALIZER = 'json'
 
 
 
-SECURE_BROWSER_XSS_FILTER = True
-SECURE_CONTENT_TYPE_NOSNIFF = True
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
+import os
+
+if os.environ.get("RENDER") == "true":
+    from django.contrib.auth.models import User
+    if not User.objects.filter(username="admin").exists():
+        User.objects.create_superuser("karan", "admin@gmail.com", "karan@123")
