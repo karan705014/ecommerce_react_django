@@ -186,6 +186,7 @@ def create_order(request):
             total = 0
 
             # LOCK PRODUCTS FIRST
+            # we use select_related to fetch related product data in cartitems
             cart_items = cart.items.select_related('product')
 
             for item in cart_items:
@@ -213,9 +214,10 @@ def create_order(request):
                 product = Product.objects.select_for_update().get(id=item.product.id)
 
                 # Reserve Stock
+                #in normal value comes first then update db its may conflict when 2 user can request at same time
+                #and in F we direct target db and update data
                 product.reserved_stock = F('reserved_stock') + item.quantity
                 product.save()
-
                 total += item.product.price * item.quantity
 
                 OrderItem.objects.create(
@@ -246,6 +248,7 @@ def create_order(request):
             {"error": str(e)},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
+
 
 
 
