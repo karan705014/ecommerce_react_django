@@ -148,3 +148,18 @@ python manage.py runserver
 
 4. Run Django server:
    python manage.py runserver
+
+Internet
+    │
+    ▼
+Nginx (Port 80)
+    │
+ ┌──┴────┐
+ │        │
+ ▼        ▼
+React     Gunicorn
+(Build)      │
+             ▼
+          Django
+
+#architecture of aws deployment

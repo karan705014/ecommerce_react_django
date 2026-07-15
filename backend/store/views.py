@@ -24,9 +24,6 @@ from .tasks import send_order_confirmation_email
 
 
 
-
-
-
 @api_view(['GET'])
 def get_products(request):
     products = Product.objects.all()
@@ -327,6 +324,7 @@ def address_list_create(request):
             serializer.save(user=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 @api_view(["DELETE"])
 @permission_classes([IsAuthenticated])

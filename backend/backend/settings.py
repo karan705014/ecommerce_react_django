@@ -26,10 +26,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 
-ALLOWED_HOSTS = ["ecommerce-react-django-4ogf.onrender.com", "localhost", "127.0.0.1"]
+ALLOWED_HOSTS = ["*"]
 
 # Application definition
 
@@ -45,7 +45,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'rest_framework',
     'store',
-    'recommendations',
+    # 'recommendations',
 ]
 
 MIDDLEWARE = [
@@ -136,7 +136,7 @@ STATIC_URL = '/static/'
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+# STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 
 
@@ -145,11 +145,14 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CORS_ALLOW_ALL_ORIGINS = False
+CORS_ALLOW_ALL_ORIGINS = True
+
 
 CORS_ALLOWED_ORIGINS = [
-    "https://karansinghbhumiharreactdjango.vercel.app",
+    "http://localhost:5173",
+    "http://localhost:3000",
 ]
+
 
 MEDIA_URL ='/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR,'media')
@@ -180,13 +183,7 @@ EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 
 
 # CELERY SETTINGS
-if os.environ.get("RENDER") is None:
-    # Local development
-    CELERY_BROKER_URL = "redis://127.0.0.1:6379/0"
-else:
-    # Production (disable celery)
-    CELERY_BROKER_URL = None
- #celary send task to redis server
+CELERY_BROKER_URL = "redis://127.0.0.1:6379/0"
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 

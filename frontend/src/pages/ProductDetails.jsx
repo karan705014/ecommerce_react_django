@@ -8,7 +8,7 @@ function ProductDetails() {
     const { addToCart } = useCart();
     const navigate = useNavigate();
 
-    const [recommendations, setRecommendations] = useState([]);
+    // const [recommendations, setRecommendations] = useState([]);
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -23,13 +23,20 @@ function ProductDetails() {
             })
             .then(data => {
                 setProduct(data);
-                return fetch(`${BASEURL}/api/recommend/${data.id}/`);
-            })
-            .then(res => res.json())
-            .then(recData => {
-                setRecommendations(recData);
+
+                // Recommendation system temporarily disabled
+                // return fetch(`${BASEURL}/api/recommend/${data.id}/`);
+
                 setLoading(false);
             })
+
+            // Recommendation system temporarily disabled
+            // .then(res => res.json())
+            // .then(recData => {
+            //     setRecommendations(recData);
+            //     setLoading(false);
+            // })
+
             .catch(err => {
                 setError(err.message);
                 setLoading(false);
@@ -82,7 +89,6 @@ function ProductDetails() {
                         ₹{product.price}
                     </p>
 
-                    {/*  STOCK DISPLAY */}
                     <p className="mt-2 font-medium">
                         {stock === 0 && (
                             <span className="text-red-400 font-semibold">
