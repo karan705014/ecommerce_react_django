@@ -230,8 +230,11 @@ def create_order(request):
             # Clear cart
             cart.items.all().delete()
 
-        if os.environ.get("RENDER") is None:
+        try:
+           if os.environ.get("RENDER") is None:
             send_order_confirmation_email.delay(order.id)
+        except Exception as e:
+           print("ETF:", e)
 
         return Response(
             {

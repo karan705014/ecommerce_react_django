@@ -113,7 +113,9 @@ function CheckoutPage() {
           navigate("/");
         }, 1500);
       } else {
-        setMessage("Order failed");
+        const data = await res.json();
+        console.log(data);
+        setMessage(data.error || "Order failed");
       }
     } catch {
       setMessage("Server error");
@@ -121,7 +123,6 @@ function CheckoutPage() {
       setLoading(false);
     }
   };
-
   return (
     <div className="min-h-screen bg-[#0f172a] pt-28 pb-16 flex justify-center relative">
 
@@ -178,11 +179,10 @@ function CheckoutPage() {
               <div
                 key={addr.id}
                 onClick={() => setSelectedAddress(addr.id)}
-                className={`p-3 rounded-lg border cursor-pointer transition text-xs ${
-                  selectedAddress === addr.id
-                    ? "border-cyan-500 bg-[#0f172a]"
-                    : "border-[#334155] hover:border-slate-400"
-                }`}
+                className={`p-3 rounded-lg border cursor-pointer transition text-xs ${selectedAddress === addr.id
+                  ? "border-cyan-500 bg-[#0f172a]"
+                  : "border-[#334155] hover:border-slate-400"
+                  }`}
               >
                 <div className="flex justify-between items-start">
                   <div>

@@ -163,3 +163,6 @@ React     Gunicorn
           Django
 
 #architecture of aws deployment
+
+#git pull
+#sudo docker compose up -d --build frontend
